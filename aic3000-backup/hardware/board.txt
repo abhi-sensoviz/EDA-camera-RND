@@ -1,0 +1,27 @@
+Raspberry Pi Compute Module 5 Rev 1.0
+Revision	: c04180
+Serial		: <redacted-serial>
+Model		: Raspberry Pi Compute Module 5 Rev 1.0
+               total        used        free      shared  buff/cache   available
+Mem:           4.0Gi       800Mi       2.4Gi        94Mi       919Mi       3.2Gi
+Swap:          511Mi          0B       511Mi
+NAME          SIZE TYPE MOUNTPOINT     FSTYPE PARTUUID
+mmcblk0      29.1G disk                       
+├─mmcblk0p1   512M part /boot/firmware vfat   8d94522e-01
+└─mmcblk0p2  28.6G part /              ext4   8d94522e-02
+mmcblk0boot0    4M disk                       
+mmcblk0boot1    4M disk                       
+2026/05/26 16:01:25 
+Copyright (c) 2012 Broadcom
+version 086b83e3 (release) (embedded)
+2026/05/26 16:01:25
+version 086b83e3332dfc8927c56762771d082f3077a1ae (release)
+timestamp 1779807685
+update-time 1782127918
+capabilities 0x0000007f
+
+[all]
+BOOT_UART=1
+# Default BOOT_ORDER for provisioning
+# SD -> NVMe -> USB -> Network
+BOOT_ORDER=0xf2461

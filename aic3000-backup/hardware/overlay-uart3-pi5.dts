@@ -1,0 +1,36 @@
+/dts-v1/;
+
+/ {
+	compatible = "brcm,bcm2712";
+
+	fragment@0 {
+		target = <0xffffffff>;
+
+		__overlay__ {
+			status = "okay";
+			pinctrl-0 = <0xffffffff>;
+			phandle = <0x01>;
+		};
+	};
+
+	__overrides__ {
+		ctsrts = [00 00 00 01 70 69 6e 63 74 72 6c 2d 30 3a 34 3d 00 ff ff ff ff];
+	};
+
+	__symbols__ {
+		frag0 = "/fragment@0/__overlay__";
+	};
+
+	__fixups__ {
+		uart3 = "/fragment@0:target:0";
+		uart3_pins = "/fragment@0/__overlay__:pinctrl-0:0";
+		uart3_ctsrts_pins = "/__overrides__:ctsrts:17";
+	};
+
+	__local_fixups__ {
+
+		__overrides__ {
+			ctsrts = <0x00>;
+		};
+	};
+};

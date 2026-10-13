@@ -1,0 +1,4 @@
+NAME          TYPE      DEVICE  AUTOCONNECT 
+eth0          ethernet  eth0    yes         
+lo            loopback  lo      no          
+AIC3000-DHCP  ethernet  --      no          

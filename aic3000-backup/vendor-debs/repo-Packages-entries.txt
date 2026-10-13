@@ -1,0 +1,33 @@
+Package: ed-aic3x00-lib
+Version: 1.20250915.1
+Architecture: arm64
+Maintainer: EDATEC <support@edatec.cn>
+Installed-Size: 816
+Priority: optional
+Section: unknown
+Filename: pool/main/e/ed-aic3x00-lib/ed-aic3x00-lib_1.20250915.1_arm64.deb
+Size: 132600
+SHA256: ef4c772c7ddbcd4c9272a14aaf0c5e32217696d3106d716c2d5d94b61aa99cd3
+SHA1: 5d73cd694a4ffa70f209745807a10f72fbd53b05
+MD5sum: af946bcbe6e4a20392d7aca38c4f3e83
+Description: EDATEC AI Camera 2024 library(HQ and GS)
+
+Package: wiringpi
+Version: 3.14
+Architecture: arm64
+Depends: libc6
+Maintainer: Grazer Computer Club - GC2 <wiringpi@gc2.at>
+Uploaders: Grazer Computer Club - GC2 <wiringpi@gc2.at>
+Priority: optional
+Section: libraries
+Filename: pool/main/w/wiringpi/wiringpi_3.14_arm64.deb
+Size: 68308
+SHA256: 70cd908726a3ac82cbd43be9b75fff62dcb9435e76128acf056cd3695dbd2b03
+SHA1: 41fd499ffab3c1c2feac938bb6af1c3921a603ba
+MD5sum: 161b9e3c1409457b9bae3c862348fef2
+Description: The wiringPi libraries, headers and gpio command
+  Libraries to allow GPIO access on a Raspberry Pi from C and C++
+  programs as well as from the command-line
+Homepage: https://github.com/WiringPi/WiringPi
+Bugs: https://github.com/WiringPi/WiringPi/issues
+

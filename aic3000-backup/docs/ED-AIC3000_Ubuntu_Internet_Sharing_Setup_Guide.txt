@@ -1,0 +1,424 @@
+                                                                                   ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+ED-AIC3000
+Wi-Fi-to-Ethernet Internet Sharing
+Ubuntu workstation → Ethernet cable → Raspberry Pi CM5 smart camera
+Practical, recoverable configuration guide using the device names and network values confirmed in your terminal
+outputs.
+
+CURRENT SITUATION SSH has been restored at 192.168.1.10. Ubuntu Ethernet sharing is configured at 10.42.0.1, and
+192.168.1.11 has been temporarily added to reach the camera. The camera has not yet been confirmed on DHCP.
+
+
+
+Your verified network interfaces
+ System / link                              Interface                      Current address
+ Ubuntu Wi-Fi (internet)                    wlx6c4cbcb48b56                192.168.88.19 / gateway 192.168.88.1
+ Ubuntu Ethernet (camera)                   enp7s0f1                       10.42.0.1/24
+ Ubuntu recovery alias                      enp7s0f1                       192.168.1.11/24 (temporary)
+ ED-AIC3000 Ethernet                        eth0                           192.168.1.10/24 (factory static)
+ Other Ubuntu Ethernet                      enp1s0                         192.167.1.1/24 - DO NOT MODIFY
+
+
+
+
+TARGET: Ubuntu remains connected to Wi-Fi for internet, Ethernet stays at 10.42.0.1, and the camera receives a
+10.42.0.x address via DHCP. SSH and TigerVNC then use the new camera IP.
+
+Before you begin
+   Keep the camera powered by its separate 24V DC supply through M12 Port 18; Ethernet uses Port 19. USB-C is not
+    needed for this procedure.
+   Run Ubuntu commands in the terminal showing qualviz@qualviz. Run camera commands only after ssh
+    pi@192.168.1.10.
+   Do not modify enp1s0 or the Ubuntu Wi-Fi interface. Do not remove the factory camera profile named eth0.
+   Do not make the new configuration permanent until SSH, VNC, internet, and DNS all work.
+
+
+
+
+                                    Technical setup reference • October 2026 | Page 1
+                                                                                          ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+Phase A | Confirm the Ubuntu shared network
+Location: Ubuntu terminal (qualviz@qualviz). These checks do not change network configuration.
+
+1. Confirm Wi-Fi remains the internet path
+ nmcli device status
+ ip -4 route get 1.1.1.1
+ ping -c 3 1.1.1.1
+
+
+Expected: the route to 1.1.1.1 uses wlx6c4cbcb48b56; the ping receives replies. This proves internet is working on the
+Ubuntu computer.
+
+2. Confirm the active camera-facing connection is shared
+ nmcli -g GENERAL.CONNECTION device show enp7s0f1
+ ip -4 addr show enp7s0f1
+ nmcli -g ipv4.method connection show "AIC3000-Share"
+
+
+Expected: the active connection is AIC3000-Share, the interface has 10.42.0.1/24, and ipv4.method prints shared. If the
+connection name differs, inspect nmcli connection show --active and use the actual name.
+
+3. Verify the recovery address is still present
+ ip -4 addr show enp7s0f1
+ ping -c 3 192.168.1.10
+
+
+If 192.168.1.11/24 is missing and the camera is still at 192.168.1.10, restore temporary local connectivity:
+
+ sudo ip addr add 192.168.1.11/24 dev enp7s0f1
+ ping -c 3 192.168.1.10
+
+
+WHY TWO ADDRESSES? 10.42.0.1 hosts the new shared network. The secondary 192.168.1.11 lets you reach the
+camera while it still uses its original factory address. The secondary address is not persistent across interface resets/reboots.
+
+
+
+Checkpoint A
+Only continue when all three conditions hold: (1) Ubuntu internet works over Wi-Fi, (2) enp7s0f1 has 10.42.0.1, and (3)
+the old camera IP 192.168.1.10 responds to ping/SSH.
+
+
+Phase B | Prepare a separate DHCP profile on the camera
+Location: camera SSH terminal (pi@raspberrypi). This phase keeps the existing connection active.
+
+4. Connect to the old camera IP
+ ssh pi@192.168.1.10
+ nmcli connection show --active
+
+
+Your earlier output showed the active camera Ethernet profile is named eth0 on interface eth0.
+
+5. Check whether the DHCP profile already exists
+ nmcli connection show "AIC3000-DHCP"
+
+
+If this prints the connection settings, do not add another profile. If it says the connection is unknown, create it with the
+next command:
+
+
+
+
+                                        Technical setup reference • October 2026 | Page 2
+                                                                                     ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+ sudo nmcli connection add type ethernet ifname eth0 \
+   con-name "AIC3000-DHCP" \
+   ipv4.method auto ipv6.method disabled \
+   connection.autoconnect no
+
+
+The new profile requests IP, gateway, and DNS settings via DHCP. Disabling autoconnect temporarily prevents it from
+taking over before you are ready.
+
+
+Phase C | Switch the camera to DHCP
+Location: camera SSH terminal, after both Phase A and Phase B checks pass.
+
+6. Keep the factory profile available for recovery
+ sudo nmcli connection modify "eth0" connection.autoconnect yes
+ nmcli -g connection.autoconnect connection show "eth0"
+
+
+Leave the original eth0 profile saved. Do not delete it: it is your known-working 192.168.1.10 fallback.
+
+7. Activate the DHCP profile
+ sudo nmcli connection up "AIC3000-DHCP"
+
+
+EXPECTED DISCONNECT As soon as the camera replaces 192.168.1.10 with a 10.42.0.x DHCP address, this SSH
+session will normally disconnect. This is expected and does not imply failure.
+
+
+Wait 20-30 seconds. On Ubuntu, do not remove 10.42.0.1 or restart NetworkManager.
+
+
+Phase D | Find the camera’s new IP address
+Location: Ubuntu terminal (qualviz@qualviz). The camera MAC address identified earlier is xx:xx:xx:xx:xx:xx (camera MAC, redacted).
+
+8. Look for a DHCP lease (if a lease file exists)
+ sudo ls -l /var/lib/NetworkManager/*lease* 2>/dev/null
+ sudo grep -Ri "xx:xx:xx:xx:xx:xx (camera MAC, redacted)" /var/lib/NetworkManager/ 2>/dev/null
+
+
+Your system previously displayed “No such file or directory” for the dnsmasq-*.leases pattern. That is not proof that
+DHCP failed. NetworkManager may store leases elsewhere or not expose them as that filename.
+
+9. Look for the camera in the Ethernet neighbor table
+ ip neigh show dev enp7s0f1
+
+
+Look for MAC xx:xx:xx:xx:xx:xx (camera MAC, redacted) next to an address such as 10.42.0.74. The number is only an example; use the address
+actually returned.
+
+10. If needed, scan only the private camera subnet
+If the neighbor table does not identify the camera, optionally install arp-scan on Ubuntu (which already has internet) and
+scan the shared subnet:
+
+ sudo apt install arp-scan
+ sudo arp-scan --interface=enp7s0f1 --localnet
+
+
+Find the row with xx:xx:xx:xx:xx:xx (camera MAC, redacted). This is a targeted scan of your directly attached local network; it does not involve
+scanning the wider company network.
+
+RECORD THIS New ED-AIC3000 IP: ______________________              Date: ______________
+
+
+
+
+                                      Technical setup reference • October 2026 | Page 3
+                                                                                     ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+Phase E | Reconnect SSH and VNC
+Location: Ubuntu terminal. Replace 10.42.0.74 in the commands with the new address found in Phase D.
+
+11. Verify that the new IP responds
+ ping -c 3 10.42.0.74
+ ssh pi@10.42.0.74
+
+
+If SSH asks you to trust a host key for the new IP, verify you are connecting to your camera before accepting. The
+password is the camera user password, not the Ubuntu PC password.
+
+12. Open the camera graphical desktop
+ xtigervncviewer 10.42.0.74::5900
+
+
+Use the newer TigerVNC viewer that previously opened the camera desktop successfully. Port 5900 is the running
+WayVNC server; Remmina may still be incompatible with its authentication scheme.
+
+
+Phase F | Validate internet inside the camera
+Location: SSH session on the camera’s NEW 10.42.0.x address.
+
+13. Verify IP, gateway, and DNS
+ ip -4 addr show eth0
+ ip -4 route
+ nmcli -g IP4.DNS device show eth0
+
+
+Expected camera IP: 10.42.0.x/24. Expected default gateway: 10.42.0.1. DNS should be supplied through DHCP.
+
+14. Test connectivity in the correct order
+ ping -c 3 10.42.0.1
+ ping -c 3 1.1.1.1
+ getent hosts deb.debian.org
+
+
+ Result                                 Interpretation
+ Gateway ping works                     Physical local Ethernet link and shared-subnet routing are likely okay.
+ 1.1.1.1 ping works                     Traffic can reach the internet through Ubuntu; IP routing/NAT works.
+ deb.debian.org resolves                DNS is working; apt can resolve repository hostnames.
+ All three work                         Ready to update/install packages on the camera.
+
+
+
+15. Retry system updates only after network tests pass
+ sudo apt update
+
+
+This is the step that previously failed with “Temporary failure resolving deb.debian.org.” After sharing and DNS are
+working, package downloads should proceed.
+
+
+
+
+                                      Technical setup reference • October 2026 | Page 4
+                                                                                      ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+Phase G | Make the setup survive reboot
+ONLY AFTER SUCCESS Do not make these autoconnect changes until the new camera IP, SSH login, VNC desktop,
+1.1.1.1 ping, and hostname lookup have all worked.
+
+
+
+16. Prefer DHCP when the camera starts
+Run on the camera:
+
+ sudo nmcli connection modify "AIC3000-DHCP" \
+   connection.autoconnect yes \
+   connection.autoconnect-priority 100
+
+ sudo nmcli connection modify "eth0" \
+   connection.autoconnect yes \
+   connection.autoconnect-priority -100
+
+
+This prioritizes the DHCP profile but keeps the original static profile stored. Priority alone is not a guarantee of automatic
+fallback if DHCP becomes unavailable; keep the recovery instructions on the next page.
+
+17. Prefer the shared connection on Ubuntu
+Run on Ubuntu:
+
+ sudo nmcli connection modify "AIC3000-Share" \
+   connection.autoconnect yes \
+   connection.autoconnect-priority 100
+
+ sudo nmcli connection modify "Wired connection 12" \
+   connection.autoconnect no
+
+
+Do not change the Wi-Fi profile or the other Ethernet profile named Wired connection 15. The old Wired connection 12
+remains saved in case you need to return to static addressing.
+
+18. Perform a planned restart test
+First note the camera’s new IP. Restart only when you have time to recover the connection. After restart, repeat the
+following on Ubuntu:
+
+ nmcli connection show --active
+ ip -4 addr show enp7s0f1
+ ping -c 3 10.42.0.74
+ xtigervncviewer 10.42.0.74::5900
+
+
+A DHCP address may change after a lease expires or hardware/network changes. Discover the updated address again if
+needed; for a permanent fixed camera address, consider a DHCP reservation or a properly configured static 10.42.0.x
+address.
+
+
+Important operating notes
+    The camera still has no detected wlan0. Its internet access is via eth0 and Ubuntu Wi-Fi sharing; no camera-side
+     Wi-Fi adapter is required.
+    The Ubuntu PC must remain running and connected to Wi-Fi for camera internet access to continue.
+    SSH and VNC over the directly connected Ethernet may continue even when Wi-Fi internet is unavailable.
+    Do not expose port 5900 or SSH directly to the public internet. Change the factory pi password and apply updates
+     after access is verified.
+
+
+
+
+                                      Technical setup reference • October 2026 | Page 5
+                                                                                            ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+Recovery and troubleshooting
+A. SSH to 192.168.1.10 no longer works
+This can be normal if the camera has switched to DHCP. First search for its 10.42.0.x address by MAC, then use the
+new IP. If the camera still uses the factory static profile, restore your Ubuntu temporary alias:
+
+ sudo ip addr add 192.168.1.11/24 dev enp7s0f1
+ ping -c 3 192.168.1.10
+ ssh -o ConnectTimeout=5 pi@192.168.1.10
+
+
+If the alias already exists, ip may report “File exists”; do not treat that as a failure.
+
+B. Ubuntu cannot communicate with the camera after the switch
+ nmcli connection show --active
+ ip -4 addr show enp7s0f1
+ ip neigh show dev enp7s0f1
+ sudo ss -lunp | grep ":67 "
+
+
+Check that AIC3000-Share is active and 10.42.0.1/24 exists. If DHCP was not assigned, inspect NetworkManager logs
+on Ubuntu:
+
+ sudo journalctl -u NetworkManager -n 100 --no-pager
+
+
+If recovery to the factory profile is necessary and you still have camera SSH access, run on the camera:
+
+ sudo nmcli connection up "eth0"
+
+
+The SSH connection will probably drop. Then reconnect at 192.168.1.10 with Ubuntu’s 192.168.1.11 recovery alias.
+
+C. 10.42.0.1 works but 1.1.1.1 fails
+Local Ethernet connectivity works, but internet forwarding/NAT is not functioning. On Ubuntu, confirm the Wi-Fi default
+route and that ipv4.method is shared:
+
+ ip -4 route get 1.1.1.1
+ nmcli -g ipv4.method connection show "AIC3000-Share"
+ sudo ufw status verbose
+
+
+If a firewall is active, its forwarding rules may block sharing. Do not disable a corporate firewall indiscriminately; inspect
+the rules or ask your IT administrator.
+
+D. 1.1.1.1 works, but deb.debian.org fails
+That is a DNS issue rather than a Wi-Fi or Ethernet link issue. On the camera:
+
+ nmcli -g IP4.DNS device show eth0
+ getent hosts deb.debian.org
+ cat /etc/resolv.conf
+
+
+Share these outputs before changing DNS settings; renewing the DHCP lease or setting a known DNS resolver may be
+needed.
+
+E. Remmina reports unknown authentication scheme
+Use xtigervncviewer instead. Earlier tests established WayVNC is listening on 5900; the older Remmina/TigerVNC
+1.10.1 clients could not negotiate the server’s security methods. Do not disable authentication to force a connection.
+
+
+
+
+                                        Technical setup reference • October 2026 | Page 6
+                                                                                     ED-AIC3000 | NETWORK SETUP GUIDE
+
+
+
+
+Quick reference & completion checklist
+Command location: which machine?
+ Command / task                                                                            Run on
+ nmcli device status; ip -4 route get 1.1.1.1                                              Ubuntu PC
+ sudo ip addr add 192.168.1.11/24 dev enp7s0f1                                             Ubuntu PC
+                                                                                           ED-AIC3000 camera via
+ sudo nmcli connection up "AIC3000-DHCP"
+                                                                                           SSH
+ sudo arp-scan --interface=enp7s0f1 --localnet                                             Ubuntu PC (optional)
+ ssh pi@10.42.0.x; xtigervncviewer 10.42.0.x::5900                                         Ubuntu PC
+                                                                                           ED-AIC3000 camera after
+ ping -c 3 1.1.1.1; sudo apt update
+                                                                                           DHCP
+
+
+
+Checklist
+☐ Ubuntu Wi-Fi internet works via wlx6c4cbcb48b56.
+☐ Ubuntu enp7s0f1 has 10.42.0.1 and method shared.
+☐ Factory camera connection eth0 has been preserved.
+☐ Camera AIC3000-DHCP received an address on 10.42.0.0/24.
+☐ Camera MAC xx:xx:xx:xx:xx:xx (camera MAC, redacted) has been matched to the new IP.
+☐ SSH connects to the new address.
+☐ TigerVNC opens the graphical desktop on port 5900.
+☐ Gateway, internet IP, and DNS tests pass on the camera.
+☐ Camera sudo apt update completes.
+☐ Autoconnect is configured only after successful tests.
+
+Where these details come from
+Device facts (factory static address 192.168.1.10, default VNC support, M12 Ethernet connection, and separate power
+input) are from the supplied ED-AIC3000 User Manual, revision dated 2026-05-21, especially sections 1.6 and 3.2
+(pages 5-9 and 14-15).
+Interface names, MAC address, existing profiles, and addresses are taken from the terminal outputs in this
+troubleshooting session. DHCP setup, internet sharing, and recovery commands are standard Linux NetworkManager
+guidance tailored to those outputs; they are not presented as manufacturer-documented procedures.
+
+FINAL REMINDER Once the camera is working on 10.42.0.x, use THAT address for both SSH and VNC. The old
+192.168.1.10 address is useful only while the original static profile is active.
+
+
+
+
+                                      Technical setup reference • October 2026 | Page 7
+

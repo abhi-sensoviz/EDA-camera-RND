@@ -1,0 +1,71 @@
+Module                  Size  Used by
+cfg80211             1032192  0
+snd_seq_dummy          49152  0
+snd_hrtimer            49152  1
+snd_seq                98304  7 snd_seq_dummy
+snd_seq_device         49152  1 snd_seq
+rfkill                 49152  2 cfg80211
+binfmt_misc            49152  1
+rpi_hevc_dec           65536  0
+aes_ce_blk             49152  0
+aes_ce_cipher          49152  1 aes_ce_blk
+ghash_ce               49152  0
+gf128mul               49152  1 ghash_ce
+libaes                 49152  3 aes_ce_cipher,ghash_ce,aes_ce_blk
+sha2_ce                49152  0
+sha256_arm64           49152  1 sha2_ce
+sha1_ce                49152  0
+rp1_cfe                65536  20
+pisp_be                49152  18
+v4l2_mem2mem           65536  1 rpi_hevc_dec
+videobuf2_dma_contig    49152  3 pisp_be,rpi_hevc_dec,rp1_cfe
+sha1_generic           49152  1 sha1_ce
+imx477                 49152  0
+v4l2_fwnode            49152  5 rp1_cfe,imx477
+videobuf2_memops       49152  1 videobuf2_dma_contig
+videobuf2_v4l2         49152  4 pisp_be,rpi_hevc_dec,rp1_cfe,v4l2_mem2mem
+v4l2_async             49152  3 v4l2_fwnode,rp1_cfe,imx477
+raspberrypi_hwmon      49152  0
+videodev              344064  38 v4l2_async,v4l2_fwnode,pisp_be,rpi_hevc_dec,videobuf2_v4l2,rp1_cfe,imx477,v4l2_mem2mem
+videobuf2_common       98304  7 pisp_be,rpi_hevc_dec,videobuf2_dma_contig,videobuf2_v4l2,rp1_cfe,v4l2_mem2mem,videobuf2_memops
+mc                     81920  13 v4l2_async,videodev,pisp_be,rpi_hevc_dec,videobuf2_v4l2,rp1_cfe,imx477,videobuf2_common,v4l2_mem2mem
+raspberrypi_gpiomem    49152  0
+rp1_adc                49152  0
+rp1_mailbox            49152  1
+nvmem_rmem             49152  0
+uio_pdrv_genirq        49152  0
+uio                    49152  1 uio_pdrv_genirq
+i2c_dev                49152  0
+ledtrig_pattern        49152  0
+fuse                  196608  5
+dm_mod                163840  0
+ip_tables              65536  0
+x_tables               81920  1 ip_tables
+ipv6                  589824  48
+spidev                 49152  0
+vc4                   425984  14
+snd_soc_hdmi_codec     49152  2
+drm_display_helper     49152  1 vc4
+cec                    65536  1 vc4
+drm_dma_helper         49152  1 vc4
+snd_soc_core          311296  2 vc4,snd_soc_hdmi_codec
+snd_compress           49152  1 snd_soc_core
+snd_pcm_dmaengine      49152  1 snd_soc_core
+snd_pcm               147456  4 snd_soc_hdmi_codec,snd_compress,snd_soc_core,snd_pcm_dmaengine
+v3d                   212992  10
+gpu_sched              98304  1 v3d
+drm_shmem_helper       49152  1 v3d
+spi_bcm2835            49152  0
+i2c_brcmstb            49152  0
+drm_kms_helper        245760  3 drm_dma_helper,vc4,drm_shmem_helper
+snd_timer              65536  3 snd_seq,snd_hrtimer,snd_pcm
+snd                   131072  9 snd_seq,snd_seq_device,snd_soc_hdmi_codec,snd_timer,snd_compress,snd_soc_core,snd_pcm
+gpio_keys              49152  0
+drm                   688128  20 gpu_sched,drm_kms_helper,drm_dma_helper,v3d,vc4,drm_shmem_helper,drm_display_helper
+drm_panel_orientation_quirks    65536  1 drm
+backlight              49152  2 drm_kms_helper,drm
+dwc2                  212992  0
+rp1_pio                65536  0
+i2c_designware_platform    49152  0
+i2c_designware_core    49152  1 i2c_designware_platform
+rp1                    49152  1 rp1_pio

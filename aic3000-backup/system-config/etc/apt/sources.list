@@ -1,0 +1,16 @@
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+
+#deb http://snapshot.debian.org/archive/debian/20251001T203719Z bookworm main contrib non-free non-free-firmware
+#deb http://snapshot.debian.org/archive/debian-security/20251001T130422Z bookworm-security main contrib non-free non-free-firmware
+#deb http://snapshot.debian.org/archive/debian/20251001T203719Z bookworm-updates main contrib non-free non-free-firmware
+
+#deb http://snapshot.debian.org/archive/debian-archive/20250624T082030Z/debian bookworm main contrib non-free non-free-firmware
+#deb http://snapshot.debian.org/archive/debian-archive/20250624T082030Z/debian-security bookworm-security main contrib non-free non-free-firmware
+#deb http://snapshot.debian.org/archive/debian-archive/20250624T082030Z/debian bookworm-updates main contrib non-free non-free-firmware
+
+# Uncomment deb-src lines below then 'apt-get update' to enable 'apt-get source'
+#deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware

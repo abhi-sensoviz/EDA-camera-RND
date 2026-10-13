@@ -1,0 +1,5 @@
+10-001a imx477
+i2c-1 Synopsys DesignWare I2C adapter
+i2c-10 Synopsys DesignWare I2C adapter
+i2c-13 107d508200.i2c
+i2c-14 107d508280.i2c

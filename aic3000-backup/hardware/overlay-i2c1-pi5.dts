@@ -1,0 +1,62 @@
+/dts-v1/;
+
+/ {
+	compatible = "brcm,bcm2712";
+
+	fragment@0 {
+		target = <0xffffffff>;
+
+		__overlay__ {
+			status = "okay";
+			clock-frequency = <0x186a0>;
+			phandle = <0x01>;
+		};
+	};
+
+	fragment@1 {
+		target = <0x01>;
+
+		__overlay__ {
+			pinctrl-0 = <0xffffffff>;
+		};
+	};
+
+	fragment@2 {
+		target = <0x01>;
+
+		__dormant__ {
+			pinctrl-0 = <0xffffffff>;
+		};
+	};
+
+	__overrides__ {
+		pins_2_3 = [00 00 00 00 2b 31 2d 32 00];
+		pins_10_11 = [00 00 00 00 2d 31 2b 32 00];
+		baudrate = [00 00 00 01 63 6c 6f 63 6b 2d 66 72 65 71 75 65 6e 63 79 3a 30 00];
+	};
+
+	__symbols__ {
+		frag0 = "/fragment@0/__overlay__";
+	};
+
+	__fixups__ {
+		i2c1 = "/fragment@0:target:0";
+		rp1_i2c1_2_3 = "/fragment@1/__overlay__:pinctrl-0:0";
+		rp1_i2c1_10_11 = "/fragment@2/__dormant__:pinctrl-0:0";
+	};
+
+	__local_fixups__ {
+
+		fragment@1 {
+			target = <0x00>;
+		};
+
+		fragment@2 {
+			target = <0x00>;
+		};
+
+		__overrides__ {
+			baudrate = <0x00>;
+		};
+	};
+};

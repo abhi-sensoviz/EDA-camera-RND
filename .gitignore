@@ -1,0 +1,23 @@
+# Full eMMC images: too large, kept locally (see os-backup/README.md)
+os-backup/*
+!os-backup/README.md
+
+# EDATEC-owned files: not redistributed.
+# Download links and SHA-256 checksums are in aic3000-backup/README.md.
+aic3000-backup/vendor-debs/*.deb
+aic3000-backup/installed-files/*.tar.gz
+aic3000-backup/reverse-engineering/
+aic3000-backup/hardware/overlay-ed-imx477.dts
+
+# All PDFs: EDATEC's manual and datasheet, plus the network guide
+# (its text, with the camera MAC redacted, is in aic3000-backup/docs/*.txt)
+*.pdf
+
+# Full internal versions of documents: internal application details and
+# device identifiers (serial number, MAC). The public versions sit beside them.
+*.private.*
+
+# Generated output
+__pycache__/
+*.pyc
+af_results/
