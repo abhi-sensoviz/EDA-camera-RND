@@ -109,9 +109,9 @@ KERNEL=="ttyAMA3", PROGRAM="/bin/sh -c 'echo 2'", SYMLINK+="com%c"
 | 2 | White/Yellow | DC+ | 24 V supply + (24 V ±10 %, 2 A adapter recommended) |
 | 3 | Brown | COMMON_IN | DI common |
 | 4 | White/Brown | DI_1 | → **GPIO17** (isolated input [I]) |
-| 5 | Purple | Trigger | Undefined with the HQ (IMX477) camera; light MCU on global-shutter models [I] |
+| 5 | Purple | Trigger | Not a CM5 GPIO: most likely the light controller's trigger input; see 4.1a [I] |
 | 6 | White/Purple | COMMON_OUT | DO common. **Never connect it to +24 V.** |
-| 7 | Red | External Strobe | Undefined with the HQ camera; light MCU on global-shutter models [I] |
+| 7 | Red | External Strobe | Not a CM5 GPIO: most likely the light controller's strobe output; see 4.1a [I] |
 | 8 | Black | DO_1 | ← **GPIO22** |
 | 9 | Green | DO_2 | ← **GPIO27** |
 | 10 | Orange | RS232_GND | |
@@ -122,6 +122,43 @@ KERNEL=="ttyAMA3", PROGRAM="/bin/sh -c 'echo 2'", SYMLINK+="com%c"
 **Electrical limits** [M]:
 - **DI:** works with NPN or PNP sensors. The SDK manual's example drives DI1 with 5 V against COMMON_IN at ground.
 - **DO:** 0.25 A maximum per channel, 0.5 A total. Fit a flyback diode on inductive loads (solenoids, relays).
+
+### 4.1a Which CM5 GPIOs the power cable reaches
+
+Only three CM5 GPIOs come out on the power cable. Everything else on it is
+power, the I/O commons, the RS232 port, or the light controller.
+
+| Wire | M12 pin | CM5 GPIO (BCM) | Direction | Use |
+|---|---|---|---|---|
+| White/Brown | 4 | **17** (DI_1) | Input, isolated | External trigger or sensor. Reads high at idle; the active level still needs confirming (section 9). |
+| Black | 8 | **22** (DO_1) | Output, isolated | OK / reject / any output; 0.25 A per channel, 0.5 A total. |
+| Green | 9 | **27** (DO_2) | Output, isolated | Second output; same limits. |
+| Blue / Gray | 11 / 12 | 4 / 5 (UART2) | Serial | RS232 through a transceiver: `/dev/com1`. Not usable as plain GPIO. |
+| Purple | 5 | none | To the light controller | "Trigger": hardware trigger input, inferred (below). |
+| Red | 7 | none | From the light controller | "External Strobe": strobe output, inferred (below). |
+| Brown / White/Purple | 3 / 6 | none | | COMMON_IN / COMMON_OUT (the DI and DO commons). |
+
+On the camera body rather than the cable: TRIG button **GPIO12** and TUNE
+button **GPIO20** (inputs, low while pressed), status LED **16** (green) / **7**
+(red), fault LED **21**, laser **13**.
+
+**Trigger (purple) and External Strobe (red).** EDATEC's manual names these
+wires and gives nothing more. Neither reaches a CM5 GPIO. The light controller
+has work modes "external IO, rising / falling / level" (2 / 3 / 4), and EDATEC's
+library handles a "hardware trigger" message `FF AA EE` from the controller on
+`/dev/com2`. So most likely:
+
+- **Trigger** is the light controller's own trigger input. In modes 2-4 it fires
+  the area lights on that input in hardware, with no software delay, and
+  reports the event to the CM5.
+- **External Strobe** drives an external light in step with it.
+
+EDATEC lists the light controller for its global-shutter models; on this
+IMX477 unit the flash modes gave no light in software tests (section 7), so
+this path is **untested**. Before connecting anything to these two wires, get
+their electrical rating and reference (COMMON_IN or DC-) from EDATEC
+(support@edatec.cn). Then test: work mode 2, a switch on Trigger, and watch
+`/dev/com2` for `ff aa ee` and the lights.
 
 ### 4.2 Ethernet: 8-pin M12 A-coded (cable to RJ45) [M]
 
