@@ -16,6 +16,19 @@
   Raspberry Pi also recommends a clean image over a major in-place upgrade.
   The step-0 image keeps everything reversible.
 
+## Progress (2026-10-14)
+
+| Step | Status |
+|---|---|
+| 0. eMMC image | **Done.** Verified image in `os-backup/` (local only). |
+| 1. Flash Trixie | **Done.** `2026-10-06` image written with Imager over `rpiboot`. |
+| 2. `config.txt` | **Done.** Overlays appended, plus an empty `ssh` file on the boot partition. |
+| 3. Network and clock | **Done.** Fixed 192.168.1.10 plus DHCP from `AIC3000-Share` (192.168.1.1); NTP synced, internet works. |
+| 4. Hardware check | **Done.** IMX477 listed; `/dev/com1`, `/dev/com2`, `/dev/i2c-1` present once the udev rule is in; lens write/read-back OK; light MCU replies `ff 15 01 0d 0a`. |
+| `apt full-upgrade` | **Done.** 54 upgraded, 12 new, RC=0. VNC enabled (`wayvnc`, port 5900). After a reboot, every step-4 check passed again. |
+| 5. Install your application | Not started. |
+| 7. Finish | Not started. The login set in Imager is still weak: change it. Also rename the camera: the hostname set in Imager is already used by another device on the office network, so `<name>.local` can reach the wrong machine (wrong-password and changed-host-key errors). |
+
 ## 0. Full eMMC image of the current camera (needs physical access)
 
 This is the only way back to the exact factory state. It is automated by `../tools/backup_emmc.sh` (run it with `sudo`), which writes to `../os-backup/`. The script checks it has the camera's disk, never writes to the eMMC, and verifies the image by checksum. The manual equivalent is below.
@@ -38,6 +51,13 @@ gunzip -c aic3000-bookworm-factory.img.gz | sudo dd of=/dev/sdX bs=4M status=pro
 ```
 
 ## 1. Flash Trixie
+
+**Image checked on 2026-10-14:** `2026-10-06-raspios-trixie-arm64.img.xz`
+(https://downloads.raspberrypi.com/raspios_arm64/images/raspios_arm64-2026-10-06/).
+- **Kernel:** 6.18.50.
+- **First-boot setup:** cloud-init 25.2 + `rpi-cloud-init-mods`, so set the user and SSH with Raspberry Pi Imager (snap 1.9.6: `sudo snap install rpi-imager`). `userconf-pi` 0.19 is still present.
+- **Already installed** (nothing extra needed for `camera-tests/`): Qt 6.8.2, `python3-picamera2` 0.3.37, `python3-smbus2`, `python3-serial`, `python3-gpiozero`, libgpiod 2.2.1 (v2 API), rpicam-apps 1.13, wayvnc 0.10.2.
+
 
 1. Install Raspberry Pi Imager: `sudo snap install rpi-imager`.
 2. Put the camera in `rpiboot` mode as in step 0.
@@ -66,10 +86,18 @@ dtoverlay=i2c1-pi5,pins_10_11
 ## 3. Network and clock
 
 - **Addressing:** the fresh OS uses DHCP on `eth0`, not 192.168.1.10.
-- **Internet through this PC:** activate `AIC3000-Share` (NetworkManager shared mode, 10.42.0.1/24). It hands out an address and shares the PC's Wi-Fi.
+- **Internet through this PC:** activate `AIC3000-Share` (NetworkManager shared mode). Since 2026-10-14 it runs on **192.168.1.1/24** (`nmcli connection modify AIC3000-Share ipv4.addresses 192.168.1.1/24`), so the camera's DHCP address and its fixed 192.168.1.10 share one subnet and both are reachable from the PC. On any other Linux PC: `nmcli connection add type ethernet ifname <port> con-name AIC3000-Share ipv4.method shared ipv4.addresses 192.168.1.1/24`.
+- **NetworkManager 1.22 (Ubuntu 20.04)** silently drops a second address on a shared profile, so the share can't carry both 10.42.0.1 and 192.168.1.x; that is why the share was moved to 192.168.1.1.
+- **Keep the share active across camera reboots:** `nmcli connection modify AIC3000-Share connection.autoconnect yes connection.autoconnect-priority 100`. Without it, NetworkManager falls back to the old 192.168.1.11 profile when the camera's link drops, and the camera loses its address.
 - **Finding the camera:** `ip neigh show dev enp7s0f1`; look for the camera's MAC (on its label, or from `ip link show eth0` on the old system). Or `sudo arp-scan --interface=enp7s0f1 --localnet`.
 - **Clock:** check `timedatectl` before running `apt`. A clock that is months behind makes `apt` reject the package lists as "not valid yet".
-- **Fixed address:** if a fixed IP is wanted later, add a static `nmcli` profile after setup.
+- **Fixed address (applied 2026-10-14):** keep DHCP and add 192.168.1.10/24 as a second address, so the camera is reachable from any PC set to 192.168.1.x, with or without a DHCP server:
+  ```bash
+  sudo nmcli connection modify "Wired connection 1" +ipv4.addresses 192.168.1.10/24 ipv4.dhcp-timeout infinity
+  sudo nmcli connection up "Wired connection 1"
+  ```
+  `dhcp-timeout infinity` keeps DHCP retrying instead of failing after 45 s, so the fixed address stays up. Tested: with the PC on plain 192.168.1.11 (no DHCP) the camera kept 192.168.1.10 for 90 s while retrying; switching the PC back to `AIC3000-Share` gave it a 10.42.0.x lease and internet again.
+  A NetworkManager hook ([`camera-setup/50-aic-fixed-ip`](../camera-setup/50-aic-fixed-ip)) marks 192.168.1.10 deprecated whenever a DHCP address exists, so `.local` names resolve to the DHCP address. Full guide: [`../ED-AIC3000_NETWORK_SETUP.md`](../ED-AIC3000_NETWORK_SETUP.md).
 
 ## 4. Check the hardware before installing your application
 

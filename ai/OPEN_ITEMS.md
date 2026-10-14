@@ -12,6 +12,7 @@
 3. **Light-MCU details.**
    - The version query is verified, and the command set was reported working with `camera-tests/test_lights.py`.
    - Still to record: which work mode the flash commands (`6`/`7`/`8`) need (test step 5), and what the lights do in camera-synced modes 0–4 (step 6).
+   - **First open after boot can miss.** On the fresh Trixie install, the first `D-` after boot got no reply; every query after that did. Send a bare `\r\n` or retry the version query once when the port is first opened.
 4. **RS232 on `/dev/com1`.** Confirm with a TX-to-RX loopback on M12 pins 11/12.
 5. **Lens optical settle time.** 0.12 s plus 2 dropped frames works, but the real minimum is unmeasured. Measure it by stepping the code and capturing frames rapidly.
 6. **libgpiod v2 C example** in the developer guide. Compile and run it on Trixie (Bookworm ships v1).
@@ -21,8 +22,8 @@
 - **Light driver** for the MCU on `/dev/com2` (zones, brightness, work mode, flash, RGB), so no vendor library is needed.
 - **Buttons:** TUNE → autofocus and TRIG → capture in the application (GPIO20 / GPIO12, idle high).
 - **Pass/fail indication** through the laser, status LEDs and fault LED (GPIO 13 / 16 / 7 / 21).
-- **Trixie migration:** see `OS_MIGRATION_PLAN.md`. Step 0, the full eMMC image, needs physical access (hold TRIG); run `tools/backup_emmc.sh`.
-- **Internet for the camera:** the recommendation (run the PC's shared connection on 192.168.1.11, and give the camera gateway/DNS 192.168.1.11) has not been applied.
+- **Trixie migration:** see `OS_MIGRATION_PLAN.md`. Steps 0–4 are **done** (Trixie is flashed, networked and hardware-checked; see the plan's progress table). The step-0 image in `os-backup/` is local only; keep a private second copy.
+- **Internet for the camera:** done. `AIC3000-Share` on this PC now shares on 192.168.1.1; the camera keeps a fixed 192.168.1.10 and gets internet by DHCP.
 - **Lens driver identity:** ask EDATEC support for the part number, and the meaning of register `0x0028`.
 
 ## Risks and cautions

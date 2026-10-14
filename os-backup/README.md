@@ -1,7 +1,23 @@
 # ED-AIC3000 full eMMC backups
 
-These are full images of the camera's 32 GB eMMC, made by
-`../tools/backup_emmc.sh` (rpiboot, read-only), to restore the camera exactly.
+These are full images of the camera's 32 GB eMMC, used to restore the camera
+exactly. There are two ways to make one:
+
+- **Offline:** `../tools/backup_emmc.sh` (rpiboot, camera in TRIG/flash mode, read-only).
+- **Live over the network:** the camera keeps running. Its unused blocks are
+  TRIMmed first, the root filesystem is frozen with `fsfreeze` while `dd` streams
+  `/dev/mmcblk0` over SSH, and a safety timer always thaws it. This gives a
+  consistent snapshot without physical access.
+
+## Backups taken
+
+| File | Taken | Method | Compressed | Verified |
+|---|---|---|---|---|
+| `aic3000-emmc-bookworm-live-20261014-1036.img.zst` | 2026-10-14 (camera frozen 4.5 min) | live, `fsfreeze` + `dd` over SSH | 1.74 GB | 31,268,536,320 bytes (= disk); raw SHA-256 `6abb4508…ffc4` matches the read; `zstd -t` OK; `e2fsck -fn` on rootfs: clean, 147,269 files |
+
+**Contents:** Bookworm (Debian 12), kernel 6.12.25, `ed-aic3x00-lib`
+1.20250915.1, static IP 192.168.1.10, all user files. The partition table is
+`dos`, `0x8d94522e`: p1 vfat 512 MB `bootfs`, p2 ext4 28.6 GB `rootfs`.
 
 | File | What it is |
 |---|---|
@@ -19,10 +35,14 @@ These are full images of the camera's 32 GB eMMC, made by
 ```bash
 cd ~/Desktop/EDA-smartCam/tools/usbboot && sudo ./rpiboot -d mass-storage-gadget64
 lsblk -d -o NAME,SIZE,TRAN,MODEL          # find the ~31 GB USB disk. NOT sda!
-zstd -dc ../../os-backup/aic3000-emmc-bookworm-<date>.img.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+zstd -dc ../../os-backup/aic3000-emmc-bookworm-live-20261014-1036.img.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
 ```
 
 4. Power-cycle the camera without holding TRIG.
 
 The image is the whole disk, so its contents and its network settings come back
 as they were: Bookworm, static IP 192.168.1.10, EDATEC packages installed.
+
+**Keep a second copy of the `.img.zst` somewhere private** (NAS, external drive).
+It is not in git: it is large, and it contains EDATEC's software, password
+hashes and SSH host keys.
