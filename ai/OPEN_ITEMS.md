@@ -12,6 +12,7 @@
 3. **Light-MCU details.**
    - The version query is verified, and the command set was reported working with `camera-tests/test_lights.py`.
    - Still to record: which work mode the flash commands (`6`/`7`/`8`) need (test step 5), and what the lights do in camera-synced modes 0–4 (step 6).
+   - **Measured 2026-10-14 (IMX477 unit, Trixie):** the area light lights **only in manual mode** (work mode 5 + `9-\x01`): image brightness 22.6 → 29.6 on a distant scene at 60 %. Modes 0 (continuous) and 1 (software) with flash count 1, flash time 10 or 100 ms and `6-1` (sent as ASCII `'1'` or raw `0x01`) gave **no light at all** across 15 frames. The camera-linked modes evidently need the strobe signal that global-shutter models provide. With this sensor, lighting synchronised to capture has to be done in software with manual on/off, inside EDATEC's 25 ms / 330 ms (7 % duty) rating.
    - **First open after boot can miss.** On the fresh Trixie install, the first `D-` after boot got no reply; every query after that did. Send a bare `\r\n` or retry the version query once when the port is first opened.
 4. **RS232 on `/dev/com1`.** Confirm with a TX-to-RX loopback on M12 pins 11/12.
 5. **Lens optical settle time.** 0.12 s plus 2 dropped frames works, but the real minimum is unmeasured. Measure it by stepping the code and capturing frames rapidly.

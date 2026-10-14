@@ -26,7 +26,7 @@
 | 3. Network and clock | **Done.** Fixed 192.168.1.10 plus DHCP from `AIC3000-Share` (192.168.1.1); NTP synced, internet works. |
 | 4. Hardware check | **Done.** IMX477 listed; `/dev/com1`, `/dev/com2`, `/dev/i2c-1` present once the udev rule is in; lens write/read-back OK; light MCU replies `ff 15 01 0d 0a`. |
 | `apt full-upgrade` | **Done.** 54 upgraded, 12 new, RC=0. VNC enabled (`wayvnc`, port 5900). After a reboot, every step-4 check passed again. |
-| 5. Install your application | Not started. |
+| 5. Install your application | **Done.** Built on the camera and installed as a service behind an HTTPS proxy. |
 | 7. Finish | Not started. The login set in Imager is still weak: change it. Also rename the camera: the hostname set in Imager is already used by another device on the office network, so `<name>.local` can reach the wrong machine (wrong-password and changed-host-key errors). |
 
 ## 0. Full eMMC image of the current camera (needs physical access)

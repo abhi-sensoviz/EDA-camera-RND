@@ -454,6 +454,7 @@ Read with a short timeout and treat unknown bytes as informational.
 - **Two separate controls:** a zone must be **enabled** (`n-1`) **and** the light
   must be **fired**, either manually (mode 5 + `9-\x01`) or by the camera/strobe
   in modes 0–4. Enabling alone turns nothing on.
+- **Measured on the IMX477 unit:** only manual mode (5 + `9-\x01`) lights the area LEDs. Modes 0 and 1 with `6-1` produced no light, so camera-synced flashing is not available with this sensor; switch the light on and off yourself around the exposure, within the duty limit below.
 - **Manual on time:** EDATEC's library switches the light off automatically after **3 s**. Do the same, and keep manual-on pulses short (the test uses 1 s).
 - **Continuous strobing:** at 25 °C keep each pulse **≤ 25 ms** with **≥ 330 ms** off between pulses (**duty cycle ≤ 7 %**).
 - **What vendor start-up sends:** brightness 90, then `D-`. A sensible shutdown state is manual off, all zones enabled, brightness 90, RGB off (what `test_lights.py` restores).
@@ -616,7 +617,7 @@ lens can stay where it is, because it holds its code.
 | Lens changes optical focus | **[U]** sweeps show a peak at code 40000–42000, 220–230× above the noise floor |
 | Light MCU link and `D-` version reply | **[V]** `ff 15 01 0d 0a` |
 | Light zone, brightness, RGB, manual on/off commands | **[U]** reported working with `test_lights.py` |
-| Flash commands (`6`/`7`/`8`) and the mode they need; camera-synced modes 0–4 | record from your `test_lights.py` run (steps 5–6) |
+| Flash commands (`6`/`7`/`8`) and camera-synced modes 0–4 | **[V] no light** on the IMX477 unit (modes 0 and 1, 10/100 ms, `6-1` ASCII or raw); only manual mode 5 lights the area LEDs |
 | GPIO pin assignment | **[V]** EDATEC manual + disassembly + live pin states |
 | Button levels (idle high, pressed low) | **[V][U]** |
 | DI1 active level | **[?]** check with a sensor (likely active low) |
