@@ -2,7 +2,10 @@
 #
 # Full eMMC backup of the ED-AIC3000 (CM5) into EDA-smartCam/os-backup/.
 #
-#   sudo ~/Desktop/EDA-smartCam/tools/backup_emmc.sh
+#   sudo ~/Desktop/EDA-smartCam/tools/backup_emmc.sh [name]
+#
+# [name] prefixes the image file (default aic3000-emmc), e.g. "golden-v1.0" for
+# a golden image (see ED-AIC3000_GOLDEN_IMAGE.md).
 #
 # The camera is put in flashing mode (hold TRIG while powering on), rpiboot
 # turns its eMMC into a USB disk on this PC, and that disk is read end to end,
@@ -22,7 +25,8 @@ ROOT=$(dirname "$TOOLS")                       # .../EDA-smartCam
 RPIBOOT="$TOOLS/usbboot/rpiboot"
 GADGET="$TOOLS/usbboot/mass-storage-gadget64"
 OUT_DIR="$ROOT/os-backup"
-NAME="aic3000-emmc-bookworm-$(date +%Y%m%d-%H%M)"
+NAME="${1:-aic3000-emmc}-$(date +%Y%m%d-%H%M)"
+case "$NAME" in */*|.*) die "the name must be a plain file name" ;; esac
 
 if   [ -x /home/linuxbrew/.linuxbrew/bin/zstd ]; then COMP=(/home/linuxbrew/.linuxbrew/bin/zstd -T0 -3 -q -c); EXT=img.zst; DECOMP=(/home/linuxbrew/.linuxbrew/bin/zstd -dc)
 elif command -v zstd >/dev/null;                 then COMP=(zstd -T0 -3 -q -c); EXT=img.zst; DECOMP=(zstd -dc)
@@ -41,7 +45,7 @@ cat <<'EOF'
 
   On the camera:
     1. Shut it down cleanly first (from another terminal:
-         ssh -t pi@192.168.1.10 'sudo poweroff'
+         ssh -t <user>@<camera> 'sudo poweroff'
        or Shutdown in its VNC desktop), wait ~15 s, then unplug the 24 V supply.
     2. Connect its USB-C port to this PC.
     3. HOLD the TRIG button, plug the 24 V back in, keep holding ~3 s, release.

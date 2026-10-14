@@ -1,0 +1,29 @@
+# ED-AIC3000 golden image settings. Copy to golden.conf, edit, and pass to
+# seal-golden.sh; it installs the file as /etc/aic3000-golden.conf, where
+# aic3000-firstboot.sh reads it on each clone. Shell syntax.
+
+# Each unit names itself <prefix>-<last 6 hex digits of its CM5 serial>,
+# e.g. aic3000-3f9a21. Use your product name; keep it short, lowercase, a-z0-9-.
+HOSTNAME_PREFIX=aic3000
+
+# The fixed fallback address every unit keeps (ED-AIC3000_NETWORK_SETUP.md).
+# It goes into the application certificate.
+FIXED_IP=192.168.1.10
+
+# Your application's HTTPS certificate, regenerated per unit with the unit's
+# own name. Leave both empty if the application has none.
+APP_TLS_CERT=
+APP_TLS_KEY=
+APP_TLS_GROUP=root
+
+# Services seal-golden.sh stops before cleaning (space-separated).
+APP_SERVICES=""
+
+# Application state to reset in the image: databases holding users and
+# password hashes, event history, logs, captured images. Globs allowed. Each
+# path must be at least three levels deep (/var/lib/app/...), as a safety check.
+APP_RESET_PATHS=""
+
+# Anything else that must not ship: source trees, build output, test scripts.
+# Same rules as above.
+REMOVE_PATHS=""

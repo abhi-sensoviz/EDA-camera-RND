@@ -13,6 +13,7 @@ lens, MCU-driven lighting). The aims:
 |---|---|
 | Write software for the camera without the SDK | [`ED-AIC3000_DEVELOPER_GUIDE.md`](ED-AIC3000_DEVELOPER_GUIDE.md): pin map, GPIO, lens and light protocols, Python and C |
 | Know what every pin and connector does | [`ED-AIC3000_PIN_MAPPING.md`](ED-AIC3000_PIN_MAPPING.md) |
+| Set up one camera and flash the rest (production cloning) | [`ED-AIC3000_GOLDEN_IMAGE.md`](ED-AIC3000_GOLDEN_IMAGE.md) |
 | Connect the camera to a PC, give it internet, SSH/VNC to it | [`ED-AIC3000_NETWORK_SETUP.md`](ED-AIC3000_NETWORK_SETUP.md) |
 | Test the lights and the focus on the camera | [`camera-tests/`](camera-tests/): SDK-free scripts with a live view |
 | Rebuild or migrate the OS (Bookworm → Trixie) | [`ai/OS_MIGRATION_PLAN.md`](ai/OS_MIGRATION_PLAN.md), [`aic3000-backup/README.md`](aic3000-backup/README.md), [`tools/`](tools/) |
@@ -38,6 +39,7 @@ lens, MCU-driven lighting). The aims:
 ED-AIC3000_DEVELOPER_GUIDE.md   build software from scratch (protocols + code)
 ED-AIC3000_PIN_MAPPING.md       pins, buses, connectors, application notes
 ED-AIC3000_NETWORK_SETUP.md     PC connection, internet sharing, SSH/VNC, troubleshooting
+ED-AIC3000_GOLDEN_IMAGE.md      golden image: seal one camera, flash it onto new units
 camera-setup/                   files to install on a fresh camera OS (network hook, udev rule)
 camera-tests/                   test_lights.py, test_autofocus.py (live view; no SDK)
 research/                       lens probe / latency / optical tests, preview probe, method
@@ -45,6 +47,7 @@ findings/                       measured results (autofocus sweep CSVs, timings)
 ai/                             session log, knowledge base, OS migration plan, open items
 aic3000-backup/                 OS config, hardware dumps, inventory, vendor file checksums
 tools/backup_emmc.sh            full eMMC image via rpiboot (camera in TRIG/flash mode)
+tools/flash_emmc.sh             write an eMMC image to a camera and verify it
 tools/usbboot/                  submodule: github.com/raspberrypi/usbboot (rpiboot)
 os-backup/                      eMMC images (local only, not in git)
 autoFocus.py                    first SDK-based experiment (kept for reference)

@@ -20,6 +20,7 @@
 
 ## Work not started
 
+- **Golden image trial run:** seal a master, capture, flash a second unit and check its first boot (`ED-AIC3000_GOLDEN_IMAGE.md`). The scripts' safety checks and the write/verify pipeline are tested; the full cycle is not yet.
 - **Light driver** for the MCU on `/dev/com2` (zones, brightness, work mode, flash, RGB), so no vendor library is needed.
 - **Buttons:** TUNE → autofocus and TRIG → capture in the application (GPIO20 / GPIO12, idle high).
 - **Pass/fail indication** through the laser, status LEDs and fault LED (GPIO 13 / 16 / 7 / 21).

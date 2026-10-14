@@ -1,5 +1,8 @@
 # Files to install on a fresh camera OS
 
+To ship many cameras, set up one and clone it: see
+[`../ED-AIC3000_GOLDEN_IMAGE.md`](../ED-AIC3000_GOLDEN_IMAGE.md) and [`golden-image/`](golden-image/).
+
 Copy this folder to the camera, then run the commands from inside it.
 
 | File | Install to | What it does |
