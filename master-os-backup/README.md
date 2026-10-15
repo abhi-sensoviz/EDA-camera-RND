@@ -44,12 +44,35 @@ p2 ext4 28.6 GB `rootfs`.
 
 ## Flash a new camera
 
-**You need:** this repository on a Linux PC with `rpiboot` built once
-(`cd tools/usbboot && make`), the image downloaded from the
-[Drive folder](https://drive.google.com/drive/folders/1Nxu7gg8mGiuk3vCn4DAfbHc3ZIkwvXth?usp=sharing)
-into this folder (the newest, v1.1, unless you need an older one; its
-`.raw.sha256` is already here, from git), a USB-C data cable, and the camera's 24 V supply. The camera must be an ED-AIC3000
-with the 32 GB eMMC; the script refuses other disk sizes.
+### What you need
+
+**Files**, in this folder, all with the same base name:
+
+| File | Needed | Where from |
+|---|---|---|
+| `<name>.img.zst` | Yes: the image | The [Drive folder](https://drive.google.com/drive/folders/1Nxu7gg8mGiuk3vCn4DAfbHc3ZIkwvXth?usp=sharing). Take the newest (v1.1) unless you need an older one. |
+| `<name>.raw.sha256` | Yes: after writing, `flash_emmc.sh` reads the camera's eMMC back and compares it with this. Without it the script stops (`no ….raw.sha256 to verify against`) unless you add `--no-verify`. | Already here, from git |
+| `<name>.img.zst.sha256` | Only to check the download (step 1) | Already here, from git |
+
+**On the PC, once** (Ubuntu or Debian):
+
+```bash
+sudo apt install git zstd build-essential pkg-config libusb-1.0-0-dev
+git clone --recurse-submodules https://github.com/abhi-sensoviz/EDA-camera-RND.git ~/Desktop/EDA-smartCam
+cd ~/Desktop/EDA-smartCam/tools/usbboot && make      # builds rpiboot
+```
+
+`flash_emmc.sh` uses `tools/usbboot/rpiboot` and
+`tools/usbboot/mass-storage-gadget64/` from the submodule (so clone with
+`--recurse-submodules`, or run `git submodule update --init` afterwards), and
+`zstd` to decompress the image while writing. It runs with `sudo` because it
+writes to the camera's disk. It can be started from any folder: it finds
+`rpiboot` next to itself.
+
+**Hardware:** a USB-C data cable and the camera's 24 V supply. The camera must
+be an ED-AIC3000 with the 32 GB eMMC; the script refuses other disk sizes.
+
+### Steps
 
 1. **Check the download:**
    ```bash
@@ -63,6 +86,8 @@ with the 32 GB eMMC; the script refuses other disk sizes.
    cd ~/Desktop/EDA-smartCam
    sudo tools/flash_emmc.sh master-os-backup/aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst
    ```
+   or, from this folder:
+   `sudo ../tools/flash_emmc.sh aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst`
 4. **Put the camera in flashing mode** when the script asks: **hold TRIG**,
    plug the 24 V back in, keep holding about 3 s, release. Then press Enter.
 5. **Confirm the disk.** The script waits for the camera's eMMC to appear as a
