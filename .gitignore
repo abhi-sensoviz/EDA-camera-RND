@@ -2,6 +2,14 @@
 os-backup/*
 !os-backup/README.md
 
+# Master OS images (exact clones of a set-up camera): too large for git, and
+# they hold the application, password hashes and keys. Their checksums and disk
+# layout are tracked; the capture log names the application, so it stays local.
+master-os-backup/*.img
+master-os-backup/*.img.zst
+master-os-backup/*.img.gz
+master-os-backup/*.log
+
 # EDATEC-owned files: not redistributed.
 # Download links and SHA-256 checksums are in aic3000-backup/README.md.
 aic3000-backup/vendor-debs/*.deb

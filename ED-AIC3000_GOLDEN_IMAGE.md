@@ -66,7 +66,11 @@ sudo tools/backup_emmc.sh master-v1.0
 
 Sealing deletes things you need for development (see step 3), so this image is
 what you go back to for the next version. It lands in `os-backup/` (not in git)
-with its checksums. Keep a second copy somewhere safe.
+with its checksums: move them into `master-os-backup/`, where the master images
+are kept. Keep a second copy somewhere safe.
+
+Without physical access it can also be taken live over the network, with the
+camera's filesystem frozen while it streams (`master-os-backup/README.md`).
 
 ## 3. Seal the master
 

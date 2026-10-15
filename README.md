@@ -49,7 +49,9 @@ aic3000-backup/                 OS config, hardware dumps, inventory, vendor fil
 tools/backup_emmc.sh            full eMMC image via rpiboot (camera in TRIG/flash mode)
 tools/flash_emmc.sh             write an eMMC image to a camera and verify it
 tools/usbboot/                  submodule: github.com/raspberrypi/usbboot (rpiboot)
-os-backup/                      eMMC images (local only, not in git)
+os-backup/                      eMMC backups, e.g. the factory OS (local only, not in git)
+master-os-backup/               master OS images: clones of the set-up camera, flashing steps
+                                (images local only; checksums and layout in git)
 autoFocus.py                    first SDK-based experiment (kept for reference)
 ```
 
@@ -67,7 +69,7 @@ cd EDA-camera-RND/tools/usbboot && make       # builds rpiboot
 | EDATEC packages `ed-aic3x00-lib` 1.20250915.1, `wiringpi` 3.14 | `https://apt.edatec.cn/raspbian` (exact URLs and SHA-256 in `aic3000-backup/README.md`) |
 | EDATEC user manual and datasheet | https://edatec.cn/docs/aic3000/ |
 | The disassembly of EDATEC's library | kept privately (EDATEC's code); the findings are fully documented here |
-| eMMC images | local `os-backup/`; created with `tools/backup_emmc.sh` |
+| eMMC images | local `os-backup/` and `master-os-backup/` (each image is ~2-3 GB and holds keys and password hashes); created with `tools/backup_emmc.sh` or live over SSH |
 | Internal application integration | private repository |
 | The camera's serial number and MAC address | redacted from the dumps and docs |
 
