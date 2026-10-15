@@ -9,8 +9,16 @@ step 2).
 
 **The image files are not in git:** each is about 3 GB (GitHub's limit is
 100 MB per file), and they hold the application, password hashes and private
-keys. Git tracks only their checksums and disk layout. Keep the images in a
-private store (NAS, external drive) and copy the one you need into this folder.
+keys. Git tracks only their checksums and disk layout. The images are kept on
+Google Drive (links below): download the one you need into this folder.
+
+**Keep the Drive sharing restricted** to the people who need it. This repository
+is public, so a link set to "Anyone with the link" would let anyone download the
+image, keys included.
+
+| Image | Download |
+|---|---|
+| `aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst` | [Google Drive](https://drive.google.com/file/d/1H1_jW-n0x5iYW4B7IO8i6j-WDxykZzs7/view?usp=sharing) (sign-in required) |
 
 ## Images
 
@@ -32,11 +40,12 @@ p2 ext4 28.6 GB `rootfs`.
 ## Flash a new camera
 
 **You need:** this repository on a Linux PC with `rpiboot` built once
-(`cd tools/usbboot && make`), the image and its `.raw.sha256` in this folder, a
+(`cd tools/usbboot && make`), the image downloaded from Google Drive into this
+folder (its `.raw.sha256` is already here, from git), a
 USB-C data cable, and the camera's 24 V supply. The camera must be an ED-AIC3000
 with the 32 GB eMMC; the script refuses other disk sizes.
 
-1. **Check the image** after copying it here:
+1. **Check the download:**
    ```bash
    cd ~/Desktop/EDA-smartCam/master-os-backup
    sha256sum -c aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst.sha256
@@ -99,7 +108,8 @@ boot.
      the application. See [`os-backup/README.md`](../os-backup/README.md).
 3. Verify: the decompressed image matches the `.raw.sha256`, and both
    filesystems check clean (Trixie's ext4 needs `e2fsck` 1.47 or newer).
-4. Add a row to the table above and keep the previous version.
+4. Upload the `.img.zst` to Google Drive (restricted sharing), add its link and
+   a row to the tables above, and keep the previous version.
 
 ## Troubleshooting
 

@@ -69,7 +69,7 @@ cd EDA-camera-RND/tools/usbboot && make       # builds rpiboot
 | EDATEC packages `ed-aic3x00-lib` 1.20250915.1, `wiringpi` 3.14 | `https://apt.edatec.cn/raspbian` (exact URLs and SHA-256 in `aic3000-backup/README.md`) |
 | EDATEC user manual and datasheet | https://edatec.cn/docs/aic3000/ |
 | The disassembly of EDATEC's library | kept privately (EDATEC's code); the findings are fully documented here |
-| eMMC images | local `os-backup/` and `master-os-backup/` (each image is ~2-3 GB and holds keys and password hashes); created with `tools/backup_emmc.sh` or live over SSH |
+| eMMC images | local `os-backup/` and `master-os-backup/` (each image is ~2-3 GB and holds keys and password hashes); created with `tools/backup_emmc.sh` or live over SSH. Master images are on Google Drive, restricted: links in `master-os-backup/README.md` |
 | Internal application integration | private repository |
 | The camera's serial number and MAC address | redacted from the dumps and docs |
 
