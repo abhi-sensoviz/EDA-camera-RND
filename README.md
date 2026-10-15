@@ -50,8 +50,9 @@ tools/backup_emmc.sh            full eMMC image via rpiboot (camera in TRIG/flas
 tools/flash_emmc.sh             write an eMMC image to a camera and verify it
 tools/usbboot/                  submodule: github.com/raspberrypi/usbboot (rpiboot)
 os-backup/                      eMMC backups, e.g. the factory OS (local only, not in git)
-master-os-backup/               master OS images: clones of the set-up camera, flashing steps
-                                (images local only; checksums and layout in git)
+master-os-backup/               master OS images: clones of the set-up camera, flashing steps,
+                                backup_master.sh (live backup over SSH)
+                                (images on Google Drive; checksums and layout in git)
 autoFocus.py                    first SDK-based experiment (kept for reference)
 ```
 

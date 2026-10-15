@@ -70,7 +70,8 @@ with its checksums: move them into `master-os-backup/`, where the master images
 are kept. Keep a second copy somewhere safe.
 
 Without physical access it can also be taken live over the network, with the
-camera's filesystem frozen while it streams (`master-os-backup/README.md`).
+camera's filesystem frozen while it streams: `master-os-backup/backup_master.sh`
+(see `master-os-backup/README.md`).
 
 ## 3. Seal the master
 

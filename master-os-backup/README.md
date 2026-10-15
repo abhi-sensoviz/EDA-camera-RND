@@ -36,6 +36,7 @@ p2 ext4 28.6 GB `rootfs`.
 | `<name>.img.zst.sha256` | yes | Checksum of the compressed file: `sha256sum -c` it after copying the image here |
 | `<name>.partitions.sfdisk`, `<name>.lsblk.txt` | yes | Partition table and disk layout at capture time |
 | `<name>.log` | no | Capture log: when the camera was frozen and thawed |
+| `backup_master.sh` | yes | Makes a new master image of a running camera over SSH (see below) |
 
 ## Flash a new camera
 
@@ -97,19 +98,36 @@ boot.
 ## Making a new master version
 
 1. Update and test the master camera.
-2. Capture it:
-   - **Offline:** `sudo tools/backup_emmc.sh aic3000-emmc-trixie-master-v1.1`
-     (camera in TRIG/flash mode). It writes to `os-backup/`; move the files
-     here.
-   - **Live over SSH** (how v1.0 was taken): `fstrim` the camera, stop the
-     application, freeze the root filesystem with `fsfreeze` (with a safety
-     timer that always thaws it), stream `/dev/mmcblk0` with `dd` over SSH into
-     `zstd` on the PC while checksumming the raw stream, then thaw and restart
-     the application. See [`os-backup/README.md`](../os-backup/README.md).
-3. Verify: the decompressed image matches the `.raw.sha256`, and both
-   filesystems check clean (Trixie's ext4 needs `e2fsck` 1.47 or newer).
+2. **Back it up with [`backup_master.sh`](backup_master.sh)**, from this folder.
+   The image and its checksums land next to the script:
+
+   ```bash
+   cd ~/Desktop/EDA-smartCam/master-os-backup
+   ./backup_master.sh --stop <app-service> <user>@192.168.1.10 aic3000-emmc-trixie-master-v1.1
+   ```
+
+   It needs no physical access, no TRIG/flash mode and no sudo on the PC (it
+   asks for the camera's sudo password once). It:
+   1. TRIMs the camera's free space, so the image compresses to about 3 GB;
+   2. stops the services given with `--stop` (the application, so its data is
+      closed cleanly);
+   3. freezes the camera's root filesystem and streams the whole eMMC over SSH
+      while this PC checksums and compresses it: about 5 minutes on gigabit
+      Ethernet, during which the camera's writes wait;
+   4. thaws the camera and starts the services again. It also thaws if the PC
+      stops taking data for 60 s (crash, cable pulled), and by a safety timer
+      after an hour (`--max-freeze`);
+   5. checks that the image decompresses to the whole eMMC with the same
+      checksum.
+
+   `./backup_master.sh --help` lists the options. Offline instead: `sudo
+   ../tools/backup_emmc.sh <name>` with the camera in TRIG/flash mode, then move
+   the files here from `os-backup/`.
+3. Optional deeper check: both filesystems check clean (Trixie's ext4 needs
+   `e2fsck` 1.47 or newer, which Ubuntu 20.04 lacks; the camera has it).
 4. Upload the `.img.zst` to Google Drive (restricted sharing), add its link and
-   a row to the tables above, and keep the previous version.
+   a row to the tables above, commit the checksum and layout files (git ignores
+   the image and log), and keep the previous version.
 
 ## Troubleshooting
 
