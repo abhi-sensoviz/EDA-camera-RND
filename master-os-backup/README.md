@@ -16,14 +16,18 @@ Google Drive (links below): download the one you need into this folder.
 is public, so a link set to "Anyone with the link" would let anyone download the
 image, keys included.
 
+**All master images: [Google Drive folder](https://drive.google.com/drive/folders/1Nxu7gg8mGiuk3vCn4DAfbHc3ZIkwvXth?usp=sharing)** (sign-in required).
+
 | Image | Download |
 |---|---|
-| `aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst` | [Google Drive](https://drive.google.com/file/d/1H1_jW-n0x5iYW4B7IO8i6j-WDxykZzs7/view?usp=sharing) (sign-in required) |
+| `aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst` | In the [Drive folder](https://drive.google.com/drive/folders/1Nxu7gg8mGiuk3vCn4DAfbHc3ZIkwvXth?usp=sharing) |
+| `aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst` | [Google Drive](https://drive.google.com/file/d/1H1_jW-n0x5iYW4B7IO8i6j-WDxykZzs7/view?usp=sharing), also in the folder |
 
 ## Images
 
 | Image | Taken | Contents | Compressed | Verified |
 |---|---|---|---|---|
+| `aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst` | 2026-10-15 13:15, with `backup_master.sh` (application stopped, filesystem frozen 4 min 45 s) | As v1.0, with the application updated the same day | 3.07 GB | 31,268,536,320 bytes (= disk); raw SHA-256 `3340e063…e397` matches the decompressed image |
 | `aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst` | 2026-10-15, live over SSH (application stopped, filesystem frozen 4 min 43 s) | Raspberry Pi OS Trixie (Debian 13), kernel 6.18.50; `config.txt` overlays, udev rule, network setup (DHCP + fixed 192.168.1.10), VNC; the application built, installed and configured as a service; all user files, accounts and keys | 3.07 GB | 31,268,536,320 bytes (= disk); raw SHA-256 `8a907781…2adf` matches the decompressed image; bootfs `fsck.fat -n`: clean; rootfs `e2fsck -fn` 1.47.2: clean, 192,710 files |
 
 Disk layout: partition table `dos` `0xbe56c0c8`, p1 vfat 512 MB `bootfs`,
@@ -41,22 +45,23 @@ p2 ext4 28.6 GB `rootfs`.
 ## Flash a new camera
 
 **You need:** this repository on a Linux PC with `rpiboot` built once
-(`cd tools/usbboot && make`), the image downloaded from Google Drive into this
-folder (its `.raw.sha256` is already here, from git), a
-USB-C data cable, and the camera's 24 V supply. The camera must be an ED-AIC3000
+(`cd tools/usbboot && make`), the image downloaded from the
+[Drive folder](https://drive.google.com/drive/folders/1Nxu7gg8mGiuk3vCn4DAfbHc3ZIkwvXth?usp=sharing)
+into this folder (the newest, v1.1, unless you need an older one; its
+`.raw.sha256` is already here, from git), a USB-C data cable, and the camera's 24 V supply. The camera must be an ED-AIC3000
 with the 32 GB eMMC; the script refuses other disk sizes.
 
 1. **Check the download:**
    ```bash
    cd ~/Desktop/EDA-smartCam/master-os-backup
-   sha256sum -c aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst.sha256
+   sha256sum -c aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst.sha256
    ```
 2. **Power the camera off** (unplug the 24 V) and connect its **USB-C** port to
    the PC.
 3. **Start the flash script** on the PC:
    ```bash
    cd ~/Desktop/EDA-smartCam
-   sudo tools/flash_emmc.sh master-os-backup/aic3000-emmc-trixie-master-v1.0-live-20261015-1050.img.zst
+   sudo tools/flash_emmc.sh master-os-backup/aic3000-emmc-trixie-master-v1.1-live-20261015-1315.img.zst
    ```
 4. **Put the camera in flashing mode** when the script asks: **hold TRIG**,
    plug the 24 V back in, keep holding about 3 s, release. Then press Enter.
