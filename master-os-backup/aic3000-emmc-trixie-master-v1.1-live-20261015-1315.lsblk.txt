@@ -1,0 +1,6 @@
+NAME         SIZE TYPE FSTYPE LABEL  PARTUUID                             MOUNTPOINT
+mmcblk0     29.1G disk                                                    
+├─mmcblk0p1  512M part vfat   bootfs be56c0c8-01                          /boot/firmware
+└─mmcblk0p2 28.6G part ext4   rootfs be56c0c8-02                          /
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+6.18.50+rpt-rpi-2712
